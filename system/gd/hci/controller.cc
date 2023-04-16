@@ -154,8 +154,14 @@ struct Controller::impl {
           handler->BindOnceOn(this, &Controller::impl::le_set_host_feature_handler));
     }
 
-    hci_->EnqueueCommand(LeGetVendorCapabilitiesBuilder::Create(),
-                         handler->BindOnceOn(this, &Controller::impl::le_get_vendor_capabilities_handler));
+    /*
+     * Disable querying vendor capabilities to workaround this assert
+     * waiting_command_ == op_code' failed - Waiting for 0xfd57 (LE_ADV_FILTER), got 0x157 (Unknown OpCode: 343)
+     * https://android.googlesource.com/platform/packages/modules/Bluetooth/+/fe233305472ed7127a6a34a20c46f2cc1b5d4977
+     */
+    //hci_->EnqueueCommand(LeGetVendorCapabilitiesBuilder::Create(),
+    //                     handler->BindOnceOn(this, &Controller::impl::le_get_vendor_capabilities_handler));
+    vendor_capabilities_.is_supported_ = 0x00;
 
     // We only need to synchronize the last read. Make BD_ADDR to be the last one.
     std::promise<void> promise;
